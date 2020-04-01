@@ -7,9 +7,11 @@
 
 const char serviceUuid[] = "8bff20de-32fb-4350-bddb-afe103ef9640";
 const char characteristicUuid[] = "1c8dd778-e8c3-45b0-a9f3-48c33a400315";
+const char oxygenationCharacteristicUuid[] = "b8ae0c39-6204-407c-aa43-43087ec29a63";
 
 BLEService hrmService(serviceUuid);
 BLEUnsignedIntCharacteristic heartRateReading(characteristicUuid, BLERead | BLENotify);
+BLEFloatCharacteristic oxygenationReading(oxygenationCharacteristicUuid, BLERead | BLENotify);
 
 const byte oxiInt = 10; // pin connected to MAX30102 INT
 
@@ -33,9 +35,10 @@ void setup() {
     while (1);
   }
   
-  BLE.setLocalName("BLEButton");
+  BLE.setLocalName("AGORA_BLE_HRM");
   BLE.setAdvertisedService(hrmService);
   hrmService.addCharacteristic(heartRateReading);
+  hrmService.addCharacteristic(oxygenationReading);
   BLE.addService(hrmService);
   
   BLE.advertise();
@@ -67,6 +70,7 @@ void loop() {
       rf_heart_rate_and_oxygen_saturation(aun_ir_buffer, BUFFER_SIZE, aun_red_buffer, &n_spo2, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid, &ratio, &correl); 
 
       heartRateReading.writeValue(n_heart_rate);
+      oxygenationReading.writeValue(n_spo2);
     }
 
     Serial.print("Disconnected from central: ");
