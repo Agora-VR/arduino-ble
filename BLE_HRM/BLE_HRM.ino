@@ -33,7 +33,7 @@ void setup() {
     while (1);
   }
   
-  BLE.setLocalName("BLEButton");
+  BLE.setLocalName("AgoraVR-BLE");
   BLE.setAdvertisedService(hrmService);
   hrmService.addCharacteristic(heartRateReading);
   BLE.addService(hrmService);
@@ -67,6 +67,14 @@ void loop() {
       rf_heart_rate_and_oxygen_saturation(aun_ir_buffer, BUFFER_SIZE, aun_red_buffer, &n_spo2, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid, &ratio, &correl); 
 
       heartRateReading.writeValue(n_heart_rate);
+
+      Serial.println("--RF--");
+      Serial.print(n_spo2);
+      Serial.print("\t");
+      Serial.println(n_heart_rate, DEC);
+      Serial.println("------");
+      
+      delay(1000);  // Let's not print too fast
     }
 
     Serial.print("Disconnected from central: ");
