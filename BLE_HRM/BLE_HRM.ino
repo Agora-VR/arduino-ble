@@ -34,13 +34,13 @@ void setup() {
     Serial.println("starting BLE failed!");
     while (1);
   }
-  
-  BLE.setLocalName("AGORA_BLE_HRM");
+
+  BLE.setLocalName("AgoraVR-BLE");
   BLE.setAdvertisedService(hrmService);
   hrmService.addCharacteristic(heartRateReading);
   hrmService.addCharacteristic(oxygenationReading);
   BLE.addService(hrmService);
-  
+
   BLE.advertise();
 
   Serial.println("Starting!");
@@ -48,7 +48,7 @@ void setup() {
 
 void loop() {
   BLEDevice central = BLE.central();
-  
+
   if (central) {
     Serial.print("Connected to central: ");
     Serial.println(central.address());
@@ -58,19 +58,27 @@ void loop() {
       int8_t ch_spo2_valid;  //indicator to show if the SPO2 calculation is valid
       int32_t n_heart_rate; //heart rate value
       int8_t  ch_hr_valid;  //indicator to show if the heart rate calculation is valid
-      
+
       int i;
-      
+
       for (i = 0; i < BUFFER_SIZE; i++) {
         while(digitalRead(oxiInt) == 1);  //wait until the interrupt pin asserts
-        
+
         maxim_max30102_read_fifo((aun_red_buffer+i), (aun_ir_buffer+i));  //read from MAX30102 FIFO
       }
-    
-      rf_heart_rate_and_oxygen_saturation(aun_ir_buffer, BUFFER_SIZE, aun_red_buffer, &n_spo2, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid, &ratio, &correl); 
+
+      rf_heart_rate_and_oxygen_saturation(aun_ir_buffer, BUFFER_SIZE, aun_red_buffer, &n_spo2, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid, &ratio, &correl);
 
       heartRateReading.writeValue(n_heart_rate);
       oxygenationReading.writeValue(n_spo2);
+
+      Serial.println("--RF--");
+      Serial.print(n_spo2);
+      Serial.print("\t");
+      Serial.println(n_heart_rate, DEC);
+      Serial.println("------");
+
+      delay(1000);  // Let's not print too fast
     }
 
     Serial.print("Disconnected from central: ");
